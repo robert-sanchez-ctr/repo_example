@@ -1,16 +1,27 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 
 export class GithubCicdStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const lambdaFunction = new lambda.Function(this, "GithubCicdFunction", {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: "main.handler",
+      code: lambda.Code.fromAsset("lambda"),
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'GithubCicdQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const api = new apigateway.LambdaRestApi(this, "GithubApi", {
+      handler: lambdaFunction,
+      endpointConfiguration: {
+      types: [apigateway.EndpointType.REGIONAL],
+      },
+    });
+
+    new cdk.CfnOutput(this, "ApiUrl", {
+      value: api.url,
+    });
   }
 }
