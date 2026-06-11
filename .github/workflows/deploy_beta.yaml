@@ -1,32 +1,42 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
 name: Deploy to AWS (CDK)
 
 on:
-  push:
-    branches:
-      - master
+push:
+branches:
+- master
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+deploy:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+```
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      
-      - name: Install dependencies
-        working-directory: ./
-        run: npm install
-      
-      - name: Deploy CDK stack
-        working-directory: ./
-        run: npx cdk deploy 
-        env: 
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-gov-west-1
-          
+  - name: Set up Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: '20'
+
+  - name: Install dependencies
+    run: npm install
+
+  - name: Build CDK App
+    run: npm run build
+
+  - name: Configure AWS Credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws-region: us-gov-west-1
+
+  - name: Deploy CDK Stack
+    env:
+      CDK_DEFAULT_ACCOUNT: "165451922080"
+      CDK_DEFAULT_REGION: "us-gov-west-1"
+    run: npx cdk deploy --require-approval never
+```
