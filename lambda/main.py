@@ -1,8 +1,10 @@
 import json
+import os
 
 
 def handler(event, context):
-    response_body = {"message": "Hello, World!", "version": "1.0.0"}
+    version = os.environ.get("VERSION", "1.0.0")
+    response_body = {"message": "Hello, World!", "version": version}
 
     return {
         "statusCode": 200,
